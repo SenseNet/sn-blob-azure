@@ -140,11 +140,9 @@ namespace SenseNet.AzureBlobStorage
             var blob = GetBlob(providerData.BlobId);
             var chunkSize = providerData.ChunkSize;
             var id = (int) (offset / chunkSize) + 1;
-            var blockId =
-                Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "{0:D6}", id)));
-
+            var blockId = ConvertToBlockId(id);
             var blockCount = (int)Math.Ceiling((decimal)context.Length / chunkSize);
+
             using (var chunkStream = new MemoryStream(buffer))
             {
                 blob.PutBlock(blockId, chunkStream, null, null, Options);
@@ -153,13 +151,17 @@ namespace SenseNet.AzureBlobStorage
             if (id != blockCount)
                 return;
 
-            var blockList = Enumerable.Range(1, blockCount).ToList().ConvertAll(block =>
-                Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "{0:D6}", block))));
+            var blockList = Enumerable.Range(1, blockCount).ToList().ConvertAll(ConvertToBlockId);
 
             blob.PutBlockList(blockList, null, Options);
 
             SetBlobMetadata(blob, context);
+
+            string ConvertToBlockId(int blobId)
+            {
+                return Convert.ToBase64String(
+                    Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "{0:D6}", blobId)));
+            }
         }
 
         public async Task WriteAsync(BlobStorageContext context, long offset, byte[] buffer)

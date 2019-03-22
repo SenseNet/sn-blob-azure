@@ -67,6 +67,66 @@ namespace SenseNet.AzureBlobStorage.Tests
         }
 
         [Fact]
+        public void WriteChunkTest_Error_NotWritten()
+        {
+            const int uploadChunkSize = 500;
+            const int wrongBinaryChunkSize = 300;
+            const int contentSize = 700;
+
+            PrepareBlob(GetNextFileId(), contentSize, wrongBinaryChunkSize,
+                out var provider,
+                out var context,
+                out var blobId,
+                out var content);
+
+            Assert.False(provider.BlobExists(blobId));
+
+            var offset = 0;
+            
+            while (offset < content.Length)
+            {
+                var chunk = content.Skip(offset).Take(uploadChunkSize).ToArray();
+                provider.Write(context, offset, chunk);
+                offset += chunk.Length;
+            }
+
+            // blob does not exist because of the incorrect chunk size
+            Assert.False(provider.BlobExists(blobId));
+
+            Cleanup(provider, blobId);
+        }
+
+        [Fact]
+        public void WriteChunkTest_Error_WrongBlockList()
+        {
+            const int uploadChunkSize = 400;
+            const int wrongBinaryChunkSize = 200;
+            const int contentSize = 1000;
+
+            PrepareBlob(GetNextFileId(), contentSize, wrongBinaryChunkSize,
+                out var provider,
+                out var context,
+                out var blobId,
+                out var content);
+
+            Assert.False(provider.BlobExists(blobId));
+
+            var offset = 0;
+
+            Assert.Throws<Microsoft.WindowsAzure.Storage.StorageException>(() =>
+            {
+                while (offset < content.Length)
+                {
+                    var chunk = content.Skip(offset).Take(uploadChunkSize).ToArray();
+                    provider.Write(context, offset, chunk);
+                    offset += chunk.Length;
+                }
+            });
+
+            Cleanup(provider, blobId);
+        }
+
+        [Fact]
         public void Write1MTest()
         {
             const int contentSize = 64 * 1024;
