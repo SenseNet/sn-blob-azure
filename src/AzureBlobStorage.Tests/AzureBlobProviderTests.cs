@@ -82,13 +82,16 @@ namespace SenseNet.AzureBlobStorage.Tests
             Assert.False(provider.BlobExists(blobId));
 
             var offset = 0;
-            
-            while (offset < content.Length)
+
+            Assert.Throws<InvalidOperationException>(() =>
             {
-                var chunk = content.Skip(offset).Take(uploadChunkSize).ToArray();
-                provider.Write(context, offset, chunk);
-                offset += chunk.Length;
-            }
+                while (offset < content.Length)
+                {
+                    var chunk = content.Skip(offset).Take(uploadChunkSize).ToArray();
+                    provider.Write(context, offset, chunk);
+                    offset += chunk.Length;
+                }
+            });
 
             // blob does not exist because of the incorrect chunk size
             Assert.False(provider.BlobExists(blobId));
@@ -113,7 +116,7 @@ namespace SenseNet.AzureBlobStorage.Tests
 
             var offset = 0;
 
-            Assert.Throws<Microsoft.WindowsAzure.Storage.StorageException>(() =>
+            Assert.Throws<InvalidOperationException>(() =>
             {
                 while (offset < content.Length)
                 {

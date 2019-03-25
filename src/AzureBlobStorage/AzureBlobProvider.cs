@@ -143,6 +143,12 @@ namespace SenseNet.AzureBlobStorage
             var blockId = ConvertToBlockId(id);
             var blockCount = (int)Math.Ceiling((decimal)context.Length / chunkSize);
 
+            // There is a strict rule for configuration: the application chunk size must be
+            // the same as the configured Azure blob chunk size, otherwise the generated
+            // block ids would be incorrect.
+            if (buffer.Length > chunkSize || offset % chunkSize > 0)
+                throw new InvalidOperationException($"Incorrect chunk size configuration. Azure blob chunk size must be the same as the configured application chunk size. Offset: {offset}. Buffer length: {buffer.Length}. Blob chunk size: {chunkSize}.");
+
             using (var chunkStream = new MemoryStream(buffer))
             {
                 blob.PutBlock(blockId, chunkStream, null, null, Options);
