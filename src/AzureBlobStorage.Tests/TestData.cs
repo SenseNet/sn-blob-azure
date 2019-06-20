@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SenseNet.AzureBlobStorage.Tests
+namespace SenseNet.BlobStorage.Azure.Tests
 {
     public static class TestData
     {

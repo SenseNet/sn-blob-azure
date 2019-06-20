@@ -1,4 +1,4 @@
-﻿namespace SenseNet.AzureBlobStorage
+﻿namespace SenseNet.BlobStorage.Azure
 {
     public class AzureBlobProviderData
     {

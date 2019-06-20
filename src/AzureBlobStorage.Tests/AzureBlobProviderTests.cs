@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using SenseNet.ContentRepository.Storage.Data;
 using Xunit;
 
-namespace SenseNet.AzureBlobStorage.Tests
+namespace SenseNet.BlobStorage.Azure.Tests
 {
     public class AzureBlobProviderTests
     {

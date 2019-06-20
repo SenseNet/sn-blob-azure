@@ -11,7 +11,7 @@ using Microsoft.WindowsAzure.Storage.RetryPolicies;
 using SenseNet.ContentRepository.Storage.Data;
 using SenseNet.Diagnostics;
 
-namespace SenseNet.AzureBlobStorage
+namespace SenseNet.BlobStorage.Azure
 {
     public class AzureBlobProvider: IBlobProvider, IMultiTenantProvider
     {

@@ -1,7 +1,7 @@
 ﻿using SenseNet.ContentRepository.Storage;
 using SenseNet.Tools;
 
-namespace SenseNet.AzureBlobStorage
+namespace SenseNet.BlobStorage.Azure
 {
     public static class AzureBlobStorageExtensions
     {

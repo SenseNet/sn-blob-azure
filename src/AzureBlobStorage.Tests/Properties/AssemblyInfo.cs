@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("SenseNet.AzureBlobStorage.Tests")]
+[assembly: AssemblyTitle("SenseNet.BlobStorage.Azure.Tests")]
 
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]

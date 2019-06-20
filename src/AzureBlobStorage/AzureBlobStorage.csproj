@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>SenseNet.AzureBlobStorage</AssemblyName>
-    <RootNamespace>SenseNet.AzureBlobStorage</RootNamespace>
+    <AssemblyName>SenseNet.BlobStorage.Azure</AssemblyName>
+    <RootNamespace>SenseNet.BlobStorage.Azure</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>kavics,tusmester</Authors>
     <Company>Sense/Net Inc.</Company>
@@ -17,12 +17,13 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>sensenet azure blob storage</PackageTags>
     <PackageReleaseNotes>See release notes on GitHub.</PackageReleaseNotes>
+    <PackageId>SenseNet.BlobStorage.Azure</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="9.4.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="SenseNet.BlobStorage" Version="7.3.3.1" />
+    <PackageReference Include="SenseNet.BlobStorage" Version="7.3.4" />
     <PackageReference Include="SenseNet.Tools" Version="3.1.0" />
   </ItemGroup>
 
