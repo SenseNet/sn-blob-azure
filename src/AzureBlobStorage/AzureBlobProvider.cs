@@ -83,11 +83,9 @@ namespace SenseNet.BlobStorage.Azure
         {
             SnTrace.Database.Write("AzureBlobProvider.Allocate: {0}", context.BlobProviderData);
 
-            var blobId = ((AzureBlobProviderData)context.BlobProviderData)?.BlobId;
-
             context.BlobProviderData = new AzureBlobProviderData
             {
-                BlobId = blobId ?? NewBlobId(),
+                BlobId = NewBlobId(),
                 ChunkSize = ChunkSize
             };
 
