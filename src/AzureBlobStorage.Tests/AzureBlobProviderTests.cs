@@ -277,6 +277,9 @@ namespace SenseNet.BlobStorage.Azure.Tests
                 out var _,
                 out var _, blobId);
 
+            // the blob provider generated a new blob id
+            blobId = ((AzureBlobProviderData) context.BlobProviderData).BlobId;
+
             Assert.True(provider.BlobExists(blobId));
 
             await provider.DeleteAsync(context, CancellationToken.None);
@@ -320,7 +323,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
             {
                 BlobProviderData = new AzureBlobProviderData { BlobId = blobId }
             };
-            provider.AllocateAsync(context, CancellationToken.None).GetAwaiter().GetResult();
+            
             provider.DeleteAsync(context, CancellationToken.None).GetAwaiter().GetResult();
         }
 
