@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
@@ -78,7 +79,7 @@ namespace SenseNet.BlobStorage.Azure
         
         #region IBlobProvider
 
-        public void Allocate(BlobStorageContext context)
+        public Task AllocateAsync(BlobStorageContext context, CancellationToken cancellationToken)
         {
             SnTrace.Database.Write("AzureBlobProvider.Allocate: {0}", context.BlobProviderData);
 
@@ -89,6 +90,8 @@ namespace SenseNet.BlobStorage.Azure
                 BlobId = blobId ?? NewBlobId(),
                 ChunkSize = ChunkSize
             };
+
+            return Task.CompletedTask;
         }
 
         public Stream CloneStream(BlobStorageContext context, Stream stream)
@@ -96,13 +99,13 @@ namespace SenseNet.BlobStorage.Azure
             return stream is CloudBlobStream ? GetStreamForWrite(context) : GetStreamForRead(context);
         }
 
-        public void Delete(BlobStorageContext context)
+        public async Task DeleteAsync(BlobStorageContext context, CancellationToken cancellationToken)
         {
             using (var op = SnTrace.Database.StartOperation("AzureBlobProvider.Delete: {0}", context.BlobProviderData))
             {
                 var providerData = (AzureBlobProviderData)context.BlobProviderData;
                 var blob = GetBlob(providerData.BlobId);
-                blob.Delete();
+                await blob.DeleteAsync(cancellationToken).ConfigureAwait(false);
                 op.Successful = true;
             }
         }
@@ -130,8 +133,8 @@ namespace SenseNet.BlobStorage.Azure
             SnTrace.Database.Write("AzureBlobProvider.ParseData: {0}", providerData);
             return BlobStorageContext.DeserializeBlobProviderData<AzureBlobProviderData>(providerData);
         }
-
-        public void Write(BlobStorageContext context, long offset, byte[] buffer)
+        
+        public async Task WriteAsync(BlobStorageContext context, long offset, byte[] buffer, CancellationToken cancellationToken)
         {
             var providerData = (AzureBlobProviderData)context.BlobProviderData;
 
@@ -151,7 +154,8 @@ namespace SenseNet.BlobStorage.Azure
 
             using (var chunkStream = new MemoryStream(buffer))
             {
-                blob.PutBlock(blockId, chunkStream, null, null, Options);
+                await blob.PutBlockAsync(blockId, chunkStream, null, null, Options, null, cancellationToken)
+                    .ConfigureAwait(false);
             }
 
             if (id != blockCount)
@@ -159,7 +163,7 @@ namespace SenseNet.BlobStorage.Azure
 
             var blockList = Enumerable.Range(1, blockCount).ToList().ConvertAll(ConvertToBlockId);
 
-            blob.PutBlockList(blockList, null, Options);
+            await blob.PutBlockListAsync(blockList, null, Options, null, cancellationToken).ConfigureAwait(false);
 
             SetBlobMetadata(blob, context);
 
@@ -168,37 +172,6 @@ namespace SenseNet.BlobStorage.Azure
                 return Convert.ToBase64String(
                     Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "{0:D6}", blobId)));
             }
-        }
-
-        public async Task WriteAsync(BlobStorageContext context, long offset, byte[] buffer)
-        {
-            var providerData = (AzureBlobProviderData)context.BlobProviderData;
-
-            SnTrace.Database.Write("AzureBlobProvider.Write: {0}", providerData);
-
-            var blob = GetBlob(providerData.BlobId);
-            var chunkSize = providerData.ChunkSize;
-            var id = (int)(offset / chunkSize) + 1;
-            var blockId =
-                Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "{0:D6}", id)));
-
-            var blockCount = (int)Math.Ceiling((decimal)context.Length / chunkSize);
-            using (var chunkStream = new MemoryStream(buffer))
-            {
-                await blob.PutBlockAsync(blockId, chunkStream, null, null, Options, null);
-            }
-
-            if (id != blockCount)
-                return;
-
-            var blockList = Enumerable.Range(1, blockCount).ToList().ConvertAll(block =>
-                Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "{0:D6}", block))));
-
-            await blob.PutBlockListAsync(blockList, null, Options, null);
-
-            SetBlobMetadata(blob, context);
         }
 
         #endregion

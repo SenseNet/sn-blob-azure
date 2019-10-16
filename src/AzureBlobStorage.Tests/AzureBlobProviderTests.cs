@@ -15,7 +15,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
         private static int _fileId;
 
         [Fact]
-        public void WriteTest()
+        public async Task WriteTest()
         {
             const int chunkSize = 4096;
             const int contentSize = 64 * 1024;
@@ -32,7 +32,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
             while(offset < content.Length)
             {
                 var chunk = content.Skip(offset).Take(chunkSize).ToArray();
-                provider.Write(context, offset, chunk);
+                await provider.WriteAsync(context, offset, chunk, CancellationToken.None);
                 offset += chunk.Length;
             }
 
@@ -59,7 +59,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
                 var chunk = content.Skip(offset).Take(chunkSize).ToArray();
 
                 // write chunk asynchronously
-                await provider.WriteAsync(context, offset, chunk);
+                await provider.WriteAsync(context, offset, chunk, CancellationToken.None);
                 offset += chunk.Length;
             }
 
@@ -67,7 +67,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
         }
 
         [Fact]
-        public void WriteChunkTest_Error_NotWritten()
+        public async Task WriteChunkTest_Error_NotWritten()
         {
             const int uploadChunkSize = 500;
             const int wrongBinaryChunkSize = 300;
@@ -83,12 +83,12 @@ namespace SenseNet.BlobStorage.Azure.Tests
 
             var offset = 0;
 
-            Assert.Throws<InvalidOperationException>(() =>
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
                 while (offset < content.Length)
                 {
                     var chunk = content.Skip(offset).Take(uploadChunkSize).ToArray();
-                    provider.Write(context, offset, chunk);
+                    await provider.WriteAsync(context, offset, chunk, CancellationToken.None);
                     offset += chunk.Length;
                 }
             });
@@ -100,7 +100,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
         }
 
         [Fact]
-        public void WriteChunkTest_Error_WrongBlockList()
+        public async Task WriteChunkTest_Error_WrongBlockList()
         {
             const int uploadChunkSize = 400;
             const int wrongBinaryChunkSize = 200;
@@ -116,12 +116,12 @@ namespace SenseNet.BlobStorage.Azure.Tests
 
             var offset = 0;
 
-            Assert.Throws<InvalidOperationException>(() =>
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
                 while (offset < content.Length)
                 {
                     var chunk = content.Skip(offset).Take(uploadChunkSize).ToArray();
-                    provider.Write(context, offset, chunk);
+                    await provider.WriteAsync(context, offset, chunk, CancellationToken.None);
                     offset += chunk.Length;
                 }
             });
@@ -267,7 +267,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
 
         [Theory]
         [MemberData(nameof(TestData.BlobData), MemberType = typeof(TestData))]
-        public void DeleteTest(string blobId, long size)
+        public async Task DeleteTest(string blobId, long size)
         {
             const int chunkSize = 1024 * 1024;
 
@@ -279,7 +279,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
 
             Assert.True(provider.BlobExists(blobId));
 
-            provider.Delete(context);
+            await provider.DeleteAsync(context, CancellationToken.None);
 
             Assert.False(provider.BlobExists(blobId));
 
@@ -320,8 +320,8 @@ namespace SenseNet.BlobStorage.Azure.Tests
             {
                 BlobProviderData = new AzureBlobProviderData { BlobId = blobId }
             };
-            provider.Allocate(context);
-            provider.Delete(context);
+            provider.AllocateAsync(context, CancellationToken.None).GetAwaiter().GetResult();
+            provider.DeleteAsync(context, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         private static void PrepareBlob(int fileId, int contentSize, int chunkSize, 
@@ -347,7 +347,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
                 }
             };
 
-            provider.Allocate(context);
+            provider.AllocateAsync(context, CancellationToken.None).GetAwaiter().GetResult();
 
             blobId = ((AzureBlobProviderData)context.BlobProviderData).BlobId;
 
@@ -371,7 +371,7 @@ namespace SenseNet.BlobStorage.Azure.Tests
             while (offset < content.Length)
             {
                 var chunk = content.Skip(offset).Take(chunkSize).ToArray();
-                provider.Write(context, offset, chunk);
+                provider.WriteAsync(context, offset, chunk, CancellationToken.None).GetAwaiter().GetResult();
                 offset += chunk.Length;
             }
         }
