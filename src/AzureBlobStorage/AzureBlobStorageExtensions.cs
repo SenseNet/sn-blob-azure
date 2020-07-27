@@ -1,7 +1,9 @@
-﻿using SenseNet.ContentRepository.Storage;
+﻿using SenseNet.BlobStorage.Azure;
+using SenseNet.ContentRepository.Storage;
 using SenseNet.Tools;
 
-namespace SenseNet.BlobStorage.Azure
+// ReSharper disable once CheckNamespace
+namespace SenseNet.Extensions.DependencyInjection
 {
     public static class AzureBlobStorageExtensions
     {
