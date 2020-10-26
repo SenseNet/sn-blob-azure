@@ -5,4 +5,4 @@ Azure Blob Storage blob provider for the sensenet platform.
 
 For details about blob providers in sensenet and configuring the Azure blob provider please visit this article:
 
-* https://community.sensenet.com/docs/azureblob-provider
+* https://github.com/SenseNet/sensenet.github.io/blob/master/_docs/blob-provider.md
